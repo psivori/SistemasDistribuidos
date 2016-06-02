@@ -3,6 +3,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import Enums.Direction;
+import Enums.Lane;
+import Enums.Street;
+
 /**
  * Created by carlospienovi1 on 5/28/16.
  */
@@ -16,35 +20,35 @@ public class Simulator {
     /**
      * This queue will hold only vehicle objects that enter in the left lane on Main Street headed East.
      */
-    private LinkedQueue<Vehicle> EGarzonL = new LinkedQueue<Vehicle>();
+    private LinkedQueue<Vehicle> EGarzonL = new LinkedQueue<Vehicle>(Street.Garzon, Direction.E, Lane.Left);
     /**
      * This queue will hold only vehicle objects that enter in the right lane on Main Street headed East.
      */
-    private LinkedQueue<Vehicle> EGarzonR = new LinkedQueue<Vehicle>();
+    private LinkedQueue<Vehicle> EGarzonR = new LinkedQueue<Vehicle>(Street.Garzon, Direction.E, Lane.Right);
     /**
      * This queue will hold only vehicle objects that enter in the left lane on Main Street headed West.
      */
-    private LinkedQueue<Vehicle> WGarzonL = new LinkedQueue<Vehicle>();
+    private LinkedQueue<Vehicle> WGarzonL = new LinkedQueue<Vehicle>(Street.Garzon, Direction.W, Lane.Left);
     /**
      * This queue will hold only vehicle objects that enter in the right lane on Main Street headed West.
      */
-    private LinkedQueue<Vehicle> WGarzonR = new LinkedQueue<Vehicle>();
+    private LinkedQueue<Vehicle> WGarzonR = new LinkedQueue<Vehicle>(Street.Garzon, Direction.W, Lane.Right);
     /**
      * This queue will hold only vehicle objects that enter in the left lane on Church Street headed North.
      */
-    private LinkedQueue<Vehicle> NMillanL = new LinkedQueue<Vehicle>();
+    private LinkedQueue<Vehicle> NMillanL = new LinkedQueue<Vehicle>(Street.Millan, Direction.N, Lane.Left);
     /**
      * This queue will hold only vehicle objects that enter in the right lane on Church Street headed North.
      */
-    private LinkedQueue<Vehicle> NMillanR = new LinkedQueue<Vehicle>();
+    private LinkedQueue<Vehicle> NMillanR = new LinkedQueue<Vehicle>(Street.Millan, Direction.N, Lane.Right);
     /**
      * This queue will hold only vehicle objects that enter in the left lane on Church Street headed South.
      */
-    private LinkedQueue<Vehicle> SMillanL = new LinkedQueue<Vehicle>();
+    private LinkedQueue<Vehicle> SMillanL = new LinkedQueue<Vehicle>(Street.Millan, Direction.S, Lane.Left);
     /**
      * This queue will hold only vehicle objects that enter in the right lane on Church Street headed South.
      */
-    private LinkedQueue<Vehicle> SMillanR = new LinkedQueue<Vehicle>();
+    private LinkedQueue<Vehicle> SMillanR = new LinkedQueue<Vehicle>(Street.Millan, Direction.S, Lane.Right);
     /**
      * This integer value will keep track of the current time during the simulation.
      */
@@ -93,26 +97,23 @@ public class Simulator {
             outFile = new PrintWriter(bw);
 
             outFile.print("---Start of simulation, time set to 0.--- \n");
-            populate((int) (Math.random() * (13 - 7) + 7));
+            //populate((int) (Math.random() * (13 - 7) + 7));
             while (!queuesEmpty()) {
                 checkBus();
-
                 outFile.print("---Light changed. Now processing Av. MillÃ¡n traffic--- \n");
                 outFile.print("Av. Millan SUR LEFT = " + SMillanL.size() + "\n");
                 outFile.print("Av. Millan SUR RIGHT = " + SMillanR.size() + "\n");
                 outFile.print("Av. Millan NORTE LEFT = " + NMillanL.size() + "\n");
                 outFile.print("Av. Millan NORTE RIGHT = " + NMillanR.size() + "\n");
-
                 outFile.print("#omnibus = " + (EGarzonL.size() + WGarzonL.size()) + "\n");
-
                 outFile.print("Ciclo verde Av. Millan = " + cicloMillan + "\n");
 
                 moveNorthSouth();
-                populate((int) (Math.random() * (16 - 8) + 8));
+                //populate((int) (Math.random() * (16 - 8) + 8));
                 outFile.println();
                 outFile.print("---Light changed. Now processing Corredor GarzÃ³n traffic---\n");
                 moveEastWest();
-                populate((int) (Math.random() * (16 - 3) + 3));
+                //populate((int) (Math.random() * (16 - 3) + 3));
                 outFile.println();
             }
             outFile.close();
@@ -147,51 +148,58 @@ public class Simulator {
     }
 
     /**
-     * This method is only called once when first populating the intersection. It instantiates the amount of cars
-     * according to the number that is passed in. The time they are created, their arrival times, is
-     * the current time in the simulation. Each time a new vehicle is created, the vehicle number increases by 1.
-     * Depending on what lane and direction the car enters the simulation, it is placed correctly into its
-     * corresponding queue.
-     *
-     * @param randomNum of cars to be instantiated
+     * Esta clase es la que se ejecuta con el llamado de los sensores
+     * Mientras corre el simulate van a ir llegando autos y omnibus
+     * se van creando de forma asincrónica
+     * @param idSensor: el identificador del sensor es el único dato que precisamos para saber dónde está el sensor
+     * el nuevo vehiculo lo vamos a poner en una de las ocho colas dependiendo del sensor que envía la señal
      */
-    private void populate(int randomNum) {
-        int count = 0;
-        while (count < randomNum && vehicleNum <= 120) {
-            Vehicle car = new Vehicle(vehicleNum, time, time);
-            count++;
-            vehicleNum++;
-            if (car.getStreet() == Vehicle.Street.Main && car.getDirection() == Vehicle.Direction.E && car.getLane() == Vehicle.Lane.Left)
-                EGarzonL.enqueue(car);
-            else if (car.getStreet() == Vehicle.Street.Main && car.getDirection() == Vehicle.Direction.E && car.getLane() == Vehicle.Lane.Right)
-                EGarzonR.enqueue(car);
-            else if (car.getStreet() == Vehicle.Street.Main && car.getDirection() == Vehicle.Direction.W && car.getLane() == Vehicle.Lane.Left)
-                WGarzonL.enqueue(car);
-            else if (car.getStreet() == Vehicle.Street.Main && car.getDirection() == Vehicle.Direction.W && car.getLane() == Vehicle.Lane.Right)
-                WGarzonR.enqueue(car);
-            else if (car.getStreet() == Vehicle.Street.Church && car.getDirection() == Vehicle.Direction.N && car.getLane() == Vehicle.Lane.Left)
-                NMillanL.enqueue(car);
-            else if (car.getStreet() == Vehicle.Street.Church && car.getDirection() == Vehicle.Direction.N && car.getLane() == Vehicle.Lane.Right)
-                NMillanR.enqueue(car);
-            else if (car.getStreet() == Vehicle.Street.Church && car.getDirection() == Vehicle.Direction.S && car.getLane() == Vehicle.Lane.Left)
-                SMillanL.enqueue(car);
-            else
-                SMillanR.enqueue(car);
-        }
-
-        printQueues();
+    private void populate(String sensorId) {
+    	LinkedQueue<Vehicle> queue = null;
+    	switch (sensorId) {
+        case "EGarzonL":
+        	queue = EGarzonL; 
+            break;
+        case "EGarzonR":
+        	queue = EGarzonR; 
+            break;
+        case "WGarzonL":  
+        	queue = WGarzonL; 
+            break;
+        case "WGarzonR":
+        	queue = WGarzonR; 
+            break;
+        case "NMillanL":
+        	queue = NMillanL; 
+            break;
+        case "NMillanR":  
+        	queue = NMillanR; 
+            break;
+        case "SMillanL":  
+        	queue = SMillanL; 
+            break;
+        case "SMillanR":  
+        	queue = SMillanR; 
+            break;
+        default: 
+        	System.out.println("Invalid sensorId: " + sensorId);
+            break;
+    	}
+    	//Se crea el vehículo y se agrega a la cola
+    	new Vehicle(vehicleNum, time, time, queue);
     }
-
-    private void printQueues() {
-        System.out.println("BUS = " + EGarzonL.size());
-        System.out.println("EGarzonR = " + EGarzonR.size());
-        System.out.println("BUS = " + WGarzonL.size());
-        System.out.println("WGarzonR = " + WGarzonR.size());
-        System.out.println("NMillanL = " + NMillanL.size());
-        System.out.println("NMillanR = " + NMillanR.size());
-        System.out.println("SMillanL = " + SMillanL.size());
-        System.out.println("SMillanR = " + SMillanR.size());
-    }
+    
+   
+//    private void printQueues() {
+//        System.out.println("BUS = " + EGarzonL.size());
+//        System.out.println("EGarzonR = " + EGarzonR.size());
+//        System.out.println("BUS = " + WGarzonL.size());
+//        System.out.println("WGarzonR = " + WGarzonR.size());
+//        System.out.println("NMillanL = " + NMillanL.size());
+//        System.out.println("NMillanR = " + NMillanR.size());
+//        System.out.println("SMillanL = " + SMillanL.size());
+//        System.out.println("SMillanR = " + SMillanR.size());
+//    }
 
     /**
      * This method simulates the movement of vehicles in the North / South direction. Four queues are operated
@@ -248,47 +256,43 @@ public class Simulator {
      * lanes will be operated on.
      */
     private void moveEastWest() {
-        int i = 0;
-        while (i < cicloGarzon) {
-            time += CICLO_TIEMPO;
-            try {
-                if (!EGarzonL.isEmpty()) {
-                    Vehicle car = new Vehicle(0, 0, 0);
-                    car = EGarzonL.dequeue();
-                    car.setDepartureTime(time);
-                    outFile.println(car);
-                }
-            } catch (EmptyCollectionException e) {
-            }
-            try {
-                if (!EGarzonR.isEmpty()) {
-                    Vehicle car = new Vehicle(0, 0, 0);
-                    car = EGarzonR.dequeue();
-                    car.setDepartureTime(time);
-                    outFile.println(car);
-                }
-            } catch (EmptyCollectionException e) {
-            }
-            try {
-                if (!WGarzonL.isEmpty()) {
-                    Vehicle car = new Vehicle(0, 0, 0);
-                    car = WGarzonL.dequeue();
-                    car.setDepartureTime(time);
-                    outFile.println(car);
-                }
-            } catch (EmptyCollectionException e) {
-            }
-            try {
-                if (!WGarzonR.isEmpty()) {
-                    Vehicle car = new Vehicle(0, 0, 0);
-                    car = WGarzonR.dequeue();
-                    car.setDepartureTime(time);
-                    outFile.println(car);
-                }
-            } catch (EmptyCollectionException e) {
-            }
-            i++;
-        }
+    	int i = 0;
+    	while (i < cicloGarzon) {
+    		time += CICLO_TIEMPO;
+    		try {
+    			if (!EGarzonL.isEmpty()) {
+    				Vehicle car = EGarzonL.dequeue();
+    				car.setDepartureTime(time);
+    				outFile.println(car);
+    			}
+    		} catch (EmptyCollectionException e) {
+    		}
+    		try {
+    			if (!EGarzonR.isEmpty()) {
+    				Vehicle car = EGarzonR.dequeue();
+    				car.setDepartureTime(time);
+    				outFile.println(car);
+    			}
+    		} catch (EmptyCollectionException e) {
+    		}
+    		try {
+    			if (!WGarzonL.isEmpty()) {
+    				Vehicle car = WGarzonL.dequeue();
+    				car.setDepartureTime(time);
+    				outFile.println(car);
+    			}
+    		} catch (EmptyCollectionException e) {
+    		}
+    		try {
+    			if (!WGarzonR.isEmpty()) {
+    				Vehicle car = WGarzonR.dequeue();
+    				car.setDepartureTime(time);
+    				outFile.println(car);
+    			}
+    		} catch (EmptyCollectionException e) {
+    		}
+    		i++;
+    	}
     }
 
     /**

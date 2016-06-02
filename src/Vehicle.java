@@ -1,36 +1,13 @@
+import Enums.Direction;
+import Enums.Lane;
+import Enums.Street;
+
+
+
 /**
  * Created by carlospienovi1 on 5/28/16.
  */
-public class Vehicle {
-    /**
-     * This is the creation of the enumerated type direction with its possible values of
-     * north, east, west, or south.
-     */
-    public enum Direction {
-        N, E, S, W
-    }
-
-    ;
-
-    /**
-     * This is the creation of the enumerated type street with its possible values of
-     * Main or Church. This is later determined by which direction the car is going in.
-     */
-    public enum Street {
-        Main, Church
-    }
-
-    ;
-
-    /**
-     * This is the creation of the enumerated type lane with its possible values of
-     * left (car is continuing straight) or right (car is turning).
-     */
-    public enum Lane {
-        Left, Right
-    }
-
-    ;
+public class Vehicle{
     /**
      * This integer value will represent the vehicle number, which will start at 1 and increment with each new car.
      */
@@ -55,15 +32,6 @@ public class Vehicle {
      * This enumerated type will represent the lane in which the car is in.
      */
     private Lane lane;
-    /**
-     * This string object will later be used in the toString to store the value of northbound, eastbound, etc.
-     */
-    private String bound;
-    /**
-     * This string object will later be used in the toString to store the phrase of where the car continues after
-     * exiting the intersection.
-     */
-    private String continuation;
 
     /**
      * This is a constructor. It sets up the ability for a car object to be instantiated.
@@ -74,62 +42,13 @@ public class Vehicle {
      * @param aTime      The int value of this object's arrival time.
      * @param dTime      The int value of this object's departure time.
      */
-    public Vehicle(int vehicleNum, int aTime, int dTime) {
+    public Vehicle(int vehicleNum, int aTime, int dTime, LinkedQueue<Vehicle> queue) {
         vehicleNumber = vehicleNum;
         arrivalTime = aTime;
         departureTime = dTime;
-        direction = randomDirection();
-        street = randomStreet();
-        lane = randomLane();
-    }
-
-    /**
-     * This method assigns each new vehicle a randomly generated direction using the Math.random function.
-     *
-     * @return the direction the car is headed
-     */
-    public Direction randomDirection() {
-        int dirIndicator = (int) (Math.random() * (4 - 0) + 0);
-        if (dirIndicator == 1)
-            direction = Direction.N;
-        else if (dirIndicator == 2)
-            direction = Direction.E;
-        else if (dirIndicator == 3)
-            direction = Direction.S;
-        else
-            direction = Direction.W;
-
-        return direction;
-    }
-
-    /**
-     * This method assigns each new vehicle a street based on the previously generated direction
-     * from the above method.
-     *
-     * @return the street the car is on
-     */
-    public Street randomStreet() {
-        if (direction == Direction.N || direction == Direction.S) {
-            street = Street.Church;
-        } else
-            street = Street.Main;
-
-        return street;
-    }
-
-    /**
-     * This method assigns each new vehicle a randomly generated lane using the Math.random function.
-     *
-     * @return the lane the car is in
-     */
-    public Lane randomLane() {
-        int laneIndicator = (int) (Math.random() * (2 - 0) + 0);
-        if (laneIndicator == 1)
-            lane = Lane.Left;
-        else
-            lane = Lane.Right;
-
-        return lane;
+        direction = queue.getDirection();
+        street = queue.getStreet();
+        lane = queue.getLane();
     }
 
     /**

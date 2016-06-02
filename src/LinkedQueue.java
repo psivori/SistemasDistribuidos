@@ -1,3 +1,9 @@
+import Enums.Direction;
+import Enums.Lane;
+import Enums.Street;
+
+
+
 /**
  * Created by carlospienovi1 on 5/28/16.
  */
@@ -10,14 +16,21 @@ public class LinkedQueue<T> implements QueueADT<T> {
      * This is an instantiation of the generic linked node class that will help move through the elements of the queue.
      */
     private LinearNode<T> head, tail;
+   
+    private Street street;
+    private Direction direction;
+    private Lane lane;
 
     /**
      * Provides the ability to instantiate an empty queue.
      * Since there are no elements, the front and end will be the same and equivalent to null.
      */
-    public LinkedQueue() {
+    public LinkedQueue(Street street, Direction direction, Lane lane) {
         count = 0;
         head = tail = null;
+        this.street = street; 
+        this.direction = direction; 
+        this.lane = lane; 
     }
 
     /**
@@ -116,4 +129,19 @@ public class LinkedQueue<T> implements QueueADT<T> {
 
         return queueString;
     }
+
+	public Street getStreet() {
+		return street;
+	}
+
+	public Direction getDirection() {
+		return direction;
+	}
+
+	public Lane getLane() {
+		return lane;
+	}
+
+    
+    
 }
