@@ -12,51 +12,6 @@ import Enums.Street;
  */
 public class Simulator {
 
-    private static final int CICLO_TIEMPO = 1;
-    private static final int CICLO_GARZON_DEFAULT = 3;
-    private static final int CICLO_MILLAN_DEFAULT = 2;
-    private static final int MAX_AUTOS_DIRECCION = 15;
-
-    /**
-     * This queue will hold only vehicle objects that enter in the left lane on Main Street headed East.
-     */
-    private LinkedQueue<Vehicle> EGarzonL = new LinkedQueue<Vehicle>(Street.Garzon, Direction.E, Lane.Left);
-    /**
-     * This queue will hold only vehicle objects that enter in the right lane on Main Street headed East.
-     */
-    private LinkedQueue<Vehicle> EGarzonR = new LinkedQueue<Vehicle>(Street.Garzon, Direction.E, Lane.Right);
-    /**
-     * This queue will hold only vehicle objects that enter in the left lane on Main Street headed West.
-     */
-    private LinkedQueue<Vehicle> WGarzonL = new LinkedQueue<Vehicle>(Street.Garzon, Direction.W, Lane.Left);
-    /**
-     * This queue will hold only vehicle objects that enter in the right lane on Main Street headed West.
-     */
-    private LinkedQueue<Vehicle> WGarzonR = new LinkedQueue<Vehicle>(Street.Garzon, Direction.W, Lane.Right);
-    /**
-     * This queue will hold only vehicle objects that enter in the left lane on Church Street headed North.
-     */
-    private LinkedQueue<Vehicle> NMillanL = new LinkedQueue<Vehicle>(Street.Millan, Direction.N, Lane.Left);
-    /**
-     * This queue will hold only vehicle objects that enter in the right lane on Church Street headed North.
-     */
-    private LinkedQueue<Vehicle> NMillanR = new LinkedQueue<Vehicle>(Street.Millan, Direction.N, Lane.Right);
-    /**
-     * This queue will hold only vehicle objects that enter in the left lane on Church Street headed South.
-     */
-    private LinkedQueue<Vehicle> SMillanL = new LinkedQueue<Vehicle>(Street.Millan, Direction.S, Lane.Left);
-    /**
-     * This queue will hold only vehicle objects that enter in the right lane on Church Street headed South.
-     */
-    private LinkedQueue<Vehicle> SMillanR = new LinkedQueue<Vehicle>(Street.Millan, Direction.S, Lane.Right);
-    /**
-     * This integer value will keep track of the current time during the simulation.
-     */
-    int time = 0;
-
-    int cicloGarzon = CICLO_GARZON_DEFAULT;
-    int cicloMillan = CICLO_MILLAN_DEFAULT;
-
     /**
      * This integer value will keep track of the vehicle numbers of the cars that arrive at the intersection.
      */
@@ -79,17 +34,7 @@ public class Simulator {
      */
     public Simulator() {
     }
-
-    /**
-     * This method calls all others methods in this class. It firsts instantiates the objects associated with
-     * writing to the file. It then calls the populate method to start the simulation and create car objects. The
-     * amount of car objects created is between 7 and 12. Until all queues are empty, the simulation will continue
-     * to run. During the simulation, the cars will move in the North/South direction for 6 seconds, then more
-     * cars will arrive (between 8 and 15). Then the cars will move in the East/ West direction for 6 seconds,
-     * and more cars will arrive (between 3 and 15).
-     *
-     * @throws IOException this is done in case their is an error printing to the file
-     */
+ 
     public void simulate() {
         try {
             fw = new FileWriter("output.txt");
@@ -100,7 +45,6 @@ public class Simulator {
             //populate((int) (Math.random() * (13 - 7) + 7));
             while (!queuesEmpty()) {
                 checkBus();
-                outFile.print("---Light changed. Now processing Av. MillÃ¡n traffic--- \n");
                 outFile.print("Av. Millan SUR LEFT = " + SMillanL.size() + "\n");
                 outFile.print("Av. Millan SUR RIGHT = " + SMillanR.size() + "\n");
                 outFile.print("Av. Millan NORTE LEFT = " + NMillanL.size() + "\n");
@@ -111,7 +55,6 @@ public class Simulator {
                 moveNorthSouth();
                 //populate((int) (Math.random() * (16 - 8) + 8));
                 outFile.println();
-                outFile.print("---Light changed. Now processing Corredor GarzÃ³n traffic---\n");
                 moveEastWest();
                 //populate((int) (Math.random() * (16 - 3) + 3));
                 outFile.println();
@@ -147,179 +90,5 @@ public class Simulator {
         }
     }
 
-    /**
-     * Esta clase es la que se ejecuta con el llamado de los sensores
-     * Mientras corre el simulate van a ir llegando autos y omnibus
-     * se van creando de forma asincrónica
-     * @param idSensor: el identificador del sensor es el único dato que precisamos para saber dónde está el sensor
-     * el nuevo vehiculo lo vamos a poner en una de las ocho colas dependiendo del sensor que envía la señal
-     */
-    private void populate(String sensorId) {
-    	LinkedQueue<Vehicle> queue = null;
-    	switch (sensorId) {
-        case "EGarzonL":
-        	queue = EGarzonL; 
-            break;
-        case "EGarzonR":
-        	queue = EGarzonR; 
-            break;
-        case "WGarzonL":  
-        	queue = WGarzonL; 
-            break;
-        case "WGarzonR":
-        	queue = WGarzonR; 
-            break;
-        case "NMillanL":
-        	queue = NMillanL; 
-            break;
-        case "NMillanR":  
-        	queue = NMillanR; 
-            break;
-        case "SMillanL":  
-        	queue = SMillanL; 
-            break;
-        case "SMillanR":  
-        	queue = SMillanR; 
-            break;
-        default: 
-        	System.out.println("Invalid sensorId: " + sensorId);
-            break;
-    	}
-    	//Se crea el vehículo y se agrega a la cola
-    	new Vehicle(vehicleNum, time, time, queue);
-    }
-    
-   
-//    private void printQueues() {
-//        System.out.println("BUS = " + EGarzonL.size());
-//        System.out.println("EGarzonR = " + EGarzonR.size());
-//        System.out.println("BUS = " + WGarzonL.size());
-//        System.out.println("WGarzonR = " + WGarzonR.size());
-//        System.out.println("NMillanL = " + NMillanL.size());
-//        System.out.println("NMillanR = " + NMillanR.size());
-//        System.out.println("SMillanL = " + SMillanL.size());
-//        System.out.println("SMillanR = " + SMillanR.size());
-//    }
-
-    /**
-     * This method simulates the movement of vehicles in the North / South direction. Four queues are operated
-     * on at this traffic light, but the NMillanL one will be used to exemplify the functionality of the method.
-     * If there are cars waiting to move and while only two are allowed to move, a new vehicle object is
-     * instantiated. The first car in the spot is then dequeued and stored into the new car object. Its departure
-     * time is set to the current time on the clock, which was previously increased by 3 seconds each time the loop
-     * begins.
-     *
-     * @throws EmptyCollectionException this is done in case the queue is empty
-     */
-    private void moveNorthSouth() {
-        int i = 0;
-        while (i < cicloMillan) {
-            time += CICLO_TIEMPO;
-            try {
-                if (!NMillanL.isEmpty()) {
-                    Vehicle car = NMillanL.dequeue();
-                    car.setDepartureTime(time);
-                    outFile.println(car);
-                }
-            } catch (EmptyCollectionException e) {
-            }
-            try {
-                if (!NMillanR.isEmpty()) {
-                    Vehicle car = NMillanR.dequeue();
-                    car.setDepartureTime(time);
-                    outFile.println(car);
-                }
-            } catch (EmptyCollectionException e) {
-            }
-            try {
-                if (!SMillanL.isEmpty()) {
-                    Vehicle car = SMillanL.dequeue();
-                    car.setDepartureTime(time);
-                    outFile.println(car);
-                }
-            } catch (EmptyCollectionException e) {
-            }
-            try {
-                if (!SMillanR.isEmpty()) {
-                    Vehicle car = SMillanR.dequeue();
-                    car.setDepartureTime(time);
-                    outFile.println(car);
-                }
-            } catch (EmptyCollectionException e) {
-            }
-            i++;
-        }
-    }
-
-    /**
-     * This method mimics the above method. However, in this instance, only vehicles in the east and west
-     * lanes will be operated on.
-     */
-    private void moveEastWest() {
-    	int i = 0;
-    	while (i < cicloGarzon) {
-    		time += CICLO_TIEMPO;
-    		try {
-    			if (!EGarzonL.isEmpty()) {
-    				Vehicle car = EGarzonL.dequeue();
-    				car.setDepartureTime(time);
-    				outFile.println(car);
-    			}
-    		} catch (EmptyCollectionException e) {
-    		}
-    		try {
-    			if (!EGarzonR.isEmpty()) {
-    				Vehicle car = EGarzonR.dequeue();
-    				car.setDepartureTime(time);
-    				outFile.println(car);
-    			}
-    		} catch (EmptyCollectionException e) {
-    		}
-    		try {
-    			if (!WGarzonL.isEmpty()) {
-    				Vehicle car = WGarzonL.dequeue();
-    				car.setDepartureTime(time);
-    				outFile.println(car);
-    			}
-    		} catch (EmptyCollectionException e) {
-    		}
-    		try {
-    			if (!WGarzonR.isEmpty()) {
-    				Vehicle car = WGarzonR.dequeue();
-    				car.setDepartureTime(time);
-    				outFile.println(car);
-    			}
-    		} catch (EmptyCollectionException e) {
-    		}
-    		i++;
-    	}
-    }
-
-    /**
-     * This method goes through each queue and checks to see if they are empty. At the end, if all queues are
-     * empty, it returns a true value. This method is later used to know when to stop the simulation.
-     */
-    private boolean queuesEmpty() {
-        boolean empty;
-
-        empty = EGarzonL.isEmpty();
-
-        if (empty)
-            empty = EGarzonR.isEmpty();
-        if (empty)
-            empty = WGarzonL.isEmpty();
-        if (empty)
-            empty = WGarzonR.isEmpty();
-        if (empty)
-            empty = NMillanL.isEmpty();
-        if (empty)
-            empty = NMillanR.isEmpty();
-        if (empty)
-            empty = SMillanL.isEmpty();
-        if (empty)
-            empty = SMillanR.isEmpty();
-
-        return empty;
-    }
 
 }
