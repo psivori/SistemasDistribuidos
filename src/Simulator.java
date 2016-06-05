@@ -16,18 +16,6 @@ public class Simulator {
      * This integer value will keep track of the vehicle numbers of the cars that arrive at the intersection.
      */
     int vehicleNum = 1;
-    /**
-     * This creates a filewriter object that allows us for the ability to write streams of characters to a file.
-     */
-    FileWriter fw;
-    /**
-     * This creates a bufferedwriter object that allows for the efficient writing to the file.
-     */
-    BufferedWriter bw;
-    /**
-     * This creates a printwriter object that allows for the ability to use the print methods when writing to the file.
-     */
-    PrintWriter outFile;
 
     /**
      * This is a constructor. It sets up the ability for a simulator object to be instantiated.
@@ -37,11 +25,8 @@ public class Simulator {
  
     public void simulate() {
         try {
-            fw = new FileWriter("output.txt");
-            bw = new BufferedWriter(fw);
-            outFile = new PrintWriter(bw);
+           
 
-            outFile.print("---Start of simulation, time set to 0.--- \n");
             //populate((int) (Math.random() * (13 - 7) + 7));
             while (!queuesEmpty()) {
                 checkBus();

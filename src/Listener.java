@@ -58,35 +58,43 @@ public class Listener implements MessageListener {
     	switch (sensorId) {
         case 1:
         	queue = EGarzonL; 
-        	vehicle = new Vehicle(vehicleNum, time, time, "E", "Garzon", "L");
+        	vehicle = new Vehicle(vehicleNum, "E", "Garzon", "L");
+        	vehicleNum++;
             break;
         case 2:
         	queue = EGarzonR; 
-        	vehicle = new Vehicle(vehicleNum, time, time, "E", "Garzon", "R");
+        	vehicle = new Vehicle(vehicleNum, "E", "Garzon", "R");
+        	vehicleNum++;
             break;
         case 3:  
         	queue = WGarzonL;
-        	vehicle = new Vehicle(vehicleNum, time, time, "W", "Garzon", "L");
+        	vehicle = new Vehicle(vehicleNum, "W", "Garzon", "L");
+        	vehicleNum++;
             break;
         case 4:
         	queue = WGarzonR; 
-        	vehicle = new Vehicle(vehicleNum, time, time, "W", "Garzon", "R");
+        	vehicle = new Vehicle(vehicleNum, "W", "Garzon", "R");
+        	vehicleNum++;
             break;
         case 5:
         	queue = NMillanL;
-        	vehicle = new Vehicle(vehicleNum, time, time, "N", "Millan", "L");
+        	vehicle = new Vehicle(vehicleNum, "N", "Millan", "L");
+        	vehicleNum++;
             break;
         case 6:  
         	queue = NMillanR; 
-        	vehicle = new Vehicle(vehicleNum, time, time, "N", "Millan", "R");
+        	vehicle = new Vehicle(vehicleNum, "N", "Millan", "R");
+        	vehicleNum++;
             break;
         case 7:  
         	queue = SMillanL; 
-        	vehicle = new Vehicle(vehicleNum, time, time, "S", "Millan", "L");
+        	vehicle = new Vehicle(vehicleNum, "S", "Millan", "L");
+        	vehicleNum++;
             break;
         case 8:  
         	queue = SMillanR; 
-        	vehicle = new Vehicle(vehicleNum, time, time, "S", "Millan", "R");
+        	vehicle = new Vehicle(vehicleNum, "S", "Millan", "R");
+        	vehicleNum++;
             break;
         default: 
         	System.out.println("Invalid sensorId: " + sensorId);
