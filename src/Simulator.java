@@ -65,30 +65,6 @@ public class Simulator {
         }
     }
 
-    private void checkBus() {
-        int autosNorte = NMillanL.size() + NMillanR.size();
-        int autosSur = SMillanL.size() + SMillanR.size();
-
-        boolean pocosAutosEsperando = autosNorte < MAX_AUTOS_DIRECCION && autosSur < MAX_AUTOS_DIRECCION;
-        boolean alMenosUnOmnibus = !EGarzonL.isEmpty() || !WGarzonL.isEmpty();
-        boolean muchosOmnibus = EGarzonL.size() > cicloGarzon || WGarzonL.size() > cicloGarzon;
-
-        if (pocosAutosEsperando && alMenosUnOmnibus) {
-            // alargas ciclo
-            cicloMillan = CICLO_MILLAN_DEFAULT - 1;
-        } else {
-            // vuelve ciclo normal
-            cicloMillan = CICLO_MILLAN_DEFAULT;
-        }
-
-        if (pocosAutosEsperando && muchosOmnibus) {
-            // alargas ciclo
-            cicloGarzon = CICLO_GARZON_DEFAULT + 1;
-        } else {
-            // vuelve ciclo normal
-            cicloGarzon = CICLO_GARZON_DEFAULT;
-        }
-    }
-
+   
 
 }

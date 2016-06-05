@@ -42,16 +42,18 @@ import javax.naming.*;
 
 
 public class Semaforo {
-    /**
-     * Main method.
-     *
-     * @param args     the destination used by the example
-     *                 and, optionally, the number of
-     *                 messages to send
-     * @throws InterruptedException 
-     */
+	
+	static Listener listener;
+	private static final int tiempoGarzonDefault = 3000;
+	private static final int tiempoMillanDefault = 2000;
+	private static final int tiempoPriorizado = 1000;
+
+
     public static void main(String[] args) throws InterruptedException {
-        String destName = "jms/Queue";
+    	MessageConsumer consumer = null;
+    	ListenerControlador listener = null;
+    	String destName = "jms/Queue";
+    	String destNameControler = "jms/Queue2";
         System.out.println("Destination name is " + destName);
         
         /*
@@ -76,11 +78,14 @@ public class Semaforo {
          */
         ConnectionFactory connectionFactory = null;
         Destination dest = null;
+        Destination destControler = null;
 
         try {
             connectionFactory = (ConnectionFactory) jndiContext.lookup(
                     "jms/JupiterConnectionFactory");
             dest = (Destination) jndiContext.lookup(destName);
+			destControler = (Destination) jndiContext.lookup(destNameControler);
+
         } catch (Exception e) {
             System.out.println("JNDI API lookup failed: " + e.toString());
             e.printStackTrace();
@@ -105,6 +110,10 @@ public class Semaforo {
             Session session =
                 connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             producer = session.createProducer(dest);
+			consumer = session.createConsumer(destControler);
+			listener = new ListenerControlador();
+            consumer.setMessageListener(listener);
+            connection.start();
             
             TextMessage message = session.createTextMessage();
             
@@ -112,12 +121,22 @@ public class Semaforo {
                 message.setText("rojo");
                 System.out.println("Semaforo cambio la luz a "+ message.getText());
                 producer.send(message);
-                Thread.sleep(2000);
+                if (listener.prioridadGarzon == 1){
+                	listener.prioridadGarzon = 0;	
+                    Thread.sleep(tiempoMillanDefault-tiempoPriorizado);
+                }else{
+                    Thread.sleep(tiempoMillanDefault);
+                }
                 
                 message.setText("verde");
                 System.out.println("Semaforo cambio la luz a "+ message.getText());
                 producer.send(message);
-                Thread.sleep(3000);
+                if (listener.prioridadGarzon == 1){
+                	listener.prioridadGarzon = 0;	
+                    Thread.sleep(tiempoGarzonDefault+tiempoPriorizado);
+                }else{
+                    Thread.sleep(tiempoGarzonDefault);
+                }
             }
             
             /*

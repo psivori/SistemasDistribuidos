@@ -124,10 +124,15 @@ public class Sensor {
 
             TextMessage message = session.createTextMessage();
 
-            for (int i = 0; i < NUM_MSGS; i++) {
+            while (true) {
                 message.setText(SENSOR_ID);
                 System.out.println("Sensor "+ message.getText() +" notificando nuevo vehiculo detectado.");
                 producer.send(message);
+                try {
+					Thread.sleep(1000*NUM_MSGS);
+				} catch (InterruptedException e) {
+		            System.out.println("Exception occurred: " + e.toString());
+				}
             }
 
             /*

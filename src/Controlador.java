@@ -9,34 +9,45 @@
  * the program. To end the program, type Q or q on the command
  * line.
  */
-import javax.jms.*;
-import javax.naming.*;
-import java.io.*;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 
 public class Controlador {
 
 	static Listener listener;
 	static ListenerSemaforo listenerSemaforo;
+	private static int MAX_AUTOS_DIRECCION = 15;
 
 	public static void main(String[] args) {
 		String destNameSensor = null;
 		String destNameSemaforo = null;
+		String destName = null;
 		Context jndiContext = null;
 		ConnectionFactory connectionFactory = null;
 		Connection connection = null;
-		Session session = null;
 		Destination destSensor = null;
 		Destination destSemaforo = null;
+		Destination dest = null;
 		MessageConsumer consumerSensor = null;
 		MessageConsumer consumerSemaforo = null;
-		InputStreamReader inputStreamReader = null;
-		char answer = '\0';
 
 		destNameSensor = "jms/Topic";
 		System.out.println("Destination name is " + destNameSensor);
 		destNameSemaforo = "jms/Queue";
 		System.out.println("Destination name is " + destNameSemaforo);
+		destName = "jms/Queue2";
+		System.out.println("Destination name is " + destName);
+		
 
 		/*
 		 * Create a JNDI API InitialContext object if none exists
@@ -60,36 +71,73 @@ public class Controlador {
 					"jms/ConnectionFactory");
 			destSensor = (Destination) jndiContext.lookup(destNameSensor);
 			destSemaforo = (Destination) jndiContext.lookup(destNameSemaforo);
+			dest = (Destination) jndiContext.lookup(destName);
+
 		} catch (Exception e) {
 			System.out.println("JNDI API lookup failed: " + e.toString());
 			System.exit(1);
 		}
 
-		/*
-		 * Create connection.
-		 * Create session from connection; false means session is
-		 * not transacted.
-		 * Create consumer.
-		 * Register message listener (TextListener).
-		 * Receive text messages from destination.
-		 * When all messages have been received, type Q to quit.
-		 * Close connection.
-		 */
+
 		try {
 			connection = connectionFactory.createConnection();
-			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			consumerSensor = session.createConsumer(destSensor);
 			consumerSemaforo = session.createConsumer(destSemaforo);
+			final MessageProducer producer = session.createProducer(dest);
 			listener = new Listener();
-			listenerSemaforo = new ListenerSemaforo();
+			listenerSemaforo = new ListenerSemaforo(new ISemaforo() {
+
+				public void onRed() {
+					if (checkBus()){
+						try {
+							TextMessage message = session.createTextMessage();
+							message.setText("1");
+			                System.out.println("Controlador notificando cambio de prioridad.");
+							producer.send(message);
+						} catch (JMSException e) {
+				            System.out.println("Exception occurred: " + e.toString());
+						}
+					}
+				}
+
+				public void onGreen() {
+					if (checkBus()){
+						try {
+							TextMessage message = session.createTextMessage();
+							message.setText("1");
+			                System.out.println("Controlador notificando cambio de prioridad.");
+							producer.send(message);
+						} catch (JMSException e) {
+				            System.out.println("Exception occurred: " + e.toString());
+						}
+					}
+				}
+				
+			});
+
 			consumerSensor.setMessageListener(listener);
 			consumerSemaforo.setMessageListener(listenerSemaforo);
 			connection.start();
 
-			while (true) {            	
-				if ("verde".equals(listenerSemaforo.luz)){ 
+			String luz = "rojo";
+			
+			while (true) {
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if ("verde".equals(listenerSemaforo.luz)){
+					if (!luz.equals(listenerSemaforo.luz)){
+						luz = listenerSemaforo.luz;
+					}
 					moveEastWest();
 				}else if ("rojo".equals(listenerSemaforo.luz)){ 
+					if (!luz.equals(listenerSemaforo.luz)){
+						luz = listenerSemaforo.luz;
+					}
 					moveNorthSouth();
 				}	
 			}
@@ -143,4 +191,18 @@ public class Controlador {
 			//outFile.println(car);
 		}
 	}
+
+	private static boolean checkBus() {
+		System.out.println("AAAAAAAAAAAAAAA");
+		int autosNorte = listener.NMillanL.size() + listener.NMillanR.size();
+		int autosSur = listener.SMillanL.size() + listener.SMillanR.size();
+		boolean pocosAutosEsperando = autosNorte < MAX_AUTOS_DIRECCION && autosSur < MAX_AUTOS_DIRECCION;
+		boolean alMenosUnOmnibus = !listener.EGarzonL.isEmpty() || !listener.WGarzonL.isEmpty();
+		if (pocosAutosEsperando && alMenosUnOmnibus) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 }
